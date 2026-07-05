@@ -8,12 +8,14 @@
   <style>
     :root {
       --bg-gradient: radial-gradient(circle at top left, #0b0f19, #05070c);
-      --panel-bg: rgba(13, 20, 35, 0.45);
+      --panel-bg: rgba(13, 20, 35, 0.5);
       --panel-border: rgba(255, 255, 255, 0.08);
       --primary: #3b82f6;
       --primary-glow: rgba(59, 130, 246, 0.35);
       --accent: #10b981;
       --accent-glow: rgba(16, 185, 129, 0.3);
+      --cyberpunk-primary: #00f0ff;
+      --cyberpunk-accent: #ff007f;
       --text: #f8fafc;
       --text-muted: #94a3b8;
     }
@@ -40,7 +42,7 @@
       text-align: center;
       margin-bottom: 40px;
       width: 100%;
-      max-width: 1000px;
+      max-width: 1200px;
     }
 
     header h1 {
@@ -63,13 +65,13 @@
 
     main {
       width: 100%;
-      max-width: 1000px;
+      max-width: 1200px;
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 30px;
     }
 
-    @media (max-width: 850px) {
+    @media (max-width: 950px) {
       main {
         grid-template-columns: 1fr;
       }
@@ -85,6 +87,9 @@
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .card::before {
@@ -98,244 +103,334 @@
     }
 
     .section-title {
-      font-family: 'Space Grotesk', sans-serif;
       font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 24px;
+      font-weight: 800;
       display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* Drag and Drop Zone */
-    .drop-zone {
-      border: 2px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      padding: 40px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: rgba(255, 255, 255, 0.02);
-      margin-bottom: 24px;
-      display: flex;
-      flex-direction: column;
       align-items: center;
       gap: 12px;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
     }
 
-    .drop-zone:hover, .drop-zone.dragover {
-      border-color: var(--primary);
-      background: rgba(59, 130, 246, 0.05);
-      box-shadow: 0 0 20px var(--primary-glow);
-    }
-
-    .drop-zone svg {
-      width: 48px;
-      height: 48px;
-      stroke: var(--primary);
-      fill: none;
-      transition: transform 0.3s ease;
-    }
-
-    .drop-zone:hover svg {
-      transform: translateY(-5px);
-    }
-
-    .drop-zone p {
-      font-size: 1rem;
-      color: var(--text-muted);
-    }
-
-    .drop-zone span {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.3);
-    }
-
-    .file-list {
-      margin-top: 16px;
-      max-height: 120px;
-      overflow-y: auto;
+    /* Forms */
+    .form-group {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    .file-item {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 8px 12px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-    }
-
-    .file-item span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 80%;
-    }
-
-    /* Form Fields */
-    .form-group {
-      margin-bottom: 20px;
-    }
-
     label {
-      display: block;
       font-size: 0.9rem;
       font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      color: var(--text-muted);
     }
 
-    input, textarea, select {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    input[type="text"], select, textarea {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--panel-border);
       border-radius: 12px;
-      padding: 12px 16px;
+      padding: 14px 18px;
       color: #fff;
-      font-family: inherit;
       font-size: 1rem;
+      font-family: inherit;
       transition: all 0.3s ease;
+      width: 100%;
     }
 
-    input:focus, textarea:focus, select:focus {
+    input[type="text"]:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
-      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 10px var(--primary-glow);
+      background: rgba(15, 23, 42, 0.8);
     }
 
     textarea {
-      resize: vertical;
       min-height: 100px;
+      resize: vertical;
     }
 
-    /* Action Button */
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--panel-border);
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(15, 23, 42, 0.2);
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .drop-zone svg {
+      width: 48px;
+      height: 48px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .drop-zone:hover svg {
+      transform: translateY(-4px);
+      color: var(--primary);
+    }
+
+    /* File items */
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    /* Interactive Editor Panel */
+    .editor-section {
+      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(10,15,30,0.4);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .editor-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .scene-strip {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .scene-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .scene-index {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .scene-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .scene-path {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    .scene-times {
+      display: flex;
+      gap: 12px;
+      font-size: 0.85rem;
+    }
+
+    .scene-times label {
+      font-size: 0.75rem;
+    }
+
+    .scene-times input {
+      width: 60px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      color: #fff;
+      padding: 2px 6px;
+      text-align: center;
+    }
+
+    .scene-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .scene-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .scene-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .scene-btn.delete:hover {
+      background: #ef4444;
+      border-color: #ef4444;
+    }
+
+    /* Buttons */
     .btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
       color: #fff;
       border: none;
       border-radius: 14px;
-      padding: 16px;
+      padding: 16px 28px;
       font-size: 1.1rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 10px 20px var(--primary-glow);
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       gap: 10px;
+      width: 100%;
     }
 
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 15px 25px rgba(59, 130, 246, 0.5);
+      box-shadow: 0 15px 30px var(--primary-glow);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
     }
 
     .btn:disabled {
-      background: rgba(255, 255, 255, 0.08);
-      color: rgba(255, 255, 255, 0.25);
-      cursor: not-allowed;
+      background: #1e293b;
+      color: #64748b;
       box-shadow: none;
-      transform: none;
+      cursor: not-allowed;
     }
 
-    /* Live Output & Video Player */
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(255,255,255,0.1);
+      box-shadow: none;
+    }
+
+    /* Console Terminal logs */
     .terminal-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 400px;
+      max-height: 650px;
     }
 
     .terminal {
-      flex: 1;
-      background: #030712;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: #020617;
+      border: 1px solid var(--panel-border);
       border-radius: 16px;
       padding: 20px;
-      font-family: 'Space Grotesk', monospace;
+      font-family: 'Courier New', Courier, monospace;
       font-size: 0.9rem;
-      color: #38bdf8;
+      color: #10b981;
+      height: 300px;
       overflow-y: auto;
-      max-height: 380px;
-      margin-bottom: 20px;
+      box-shadow: inset 0 4px 20px rgba(0,0,0,0.8);
       display: flex;
       flex-direction: column;
       gap: 8px;
-      box-shadow: inset 0 4px 12px rgba(0,0,0,0.5);
-    }
-
-    .terminal::-webkit-scrollbar {
-      width: 6px;
-    }
-    .terminal::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
     }
 
     .log-line {
       line-height: 1.4;
-      animation: fadeIn 0.2s ease forwards;
+      white-space: pre-wrap;
     }
-    
-    .log-line.system { color: #facc15; }
-    .log-line.error { color: #ef4444; }
-    .log-line.success { color: var(--accent); }
 
+    .log-line.system { color: #3b82f6; font-weight: bold; }
+    .log-line.success { color: #10b981; font-weight: bold; }
+    .log-line.error { color: #ef4444; font-weight: bold; }
+
+    /* Video Preview */
     .video-preview {
       display: none;
       flex-direction: column;
-      align-items: center;
       gap: 20px;
-      animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      margin-top: 10px;
     }
 
     .video-preview video {
       width: 100%;
-      max-width: 320px;
-      aspect-ratio: 9/16;
       border-radius: 16px;
-      border: 2px solid var(--accent);
-      box-shadow: 0 15px 30px var(--accent-glow);
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      aspect-ratio: 9/16;
+      max-height: 480px;
+      background: #000;
+      object-fit: contain;
     }
 
     .download-btn {
-      background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
-      box-shadow: 0 10px 20px var(--accent-glow);
-      text-decoration: none;
+      background: var(--accent);
       color: #fff;
-      font-weight: 700;
-      padding: 14px 28px;
+      text-decoration: none;
+      text-align: center;
+      padding: 14px 20px;
       border-radius: 12px;
-      transition: all 0.3s ease;
-      display: inline-flex;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+      box-shadow: 0 10px 20px var(--accent-glow);
+      transition: all 0.3s ease;
     }
 
     .download-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 15px 25px rgba(16, 185, 129, 0.5);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes zoomIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+      box-shadow: 0 15px 25px var(--accent-glow);
     }
   </style>
 </head>
@@ -343,28 +438,30 @@
 
   <header>
     <h1>AdForge Studio</h1>
-    <p>Upload clips, describe your vision, and render a high-converting, professional 9:16 video ad locally.</p>
+    <p>Upload clips, customize script copy, reorder cuts dynamically, and render your 9:16 social video ad locally.</p>
   </header>
 
   <main>
-    <!-- Left Panel: Form & Upload -->
-    <div class="card">
+    <!-- Left Panel: Campaign configuration, upload & planning -->
+    <div class="card" id="left-card">
       <h2 class="section-title">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><rect x="2" y="2" width="20" height="20" rx="4"></rect><path d="M12 18V6"></path><path d="M6 12h12"></path></svg>
-        New Campaign Brief
+        Ad Campaign Details
       </h2>
 
+      <!-- Upload drop zone -->
       <div class="drop-zone" id="drop-zone">
         <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         <p>Drag & Drop your video clips here</p>
-        <span>Supports MP4, MOV, AVI</span>
+        <span>Supports MP4, MOV, AVI, WEBM</span>
         <input type="file" id="file-input" multiple style="display: none;" accept="video/*">
       </div>
 
       <div class="file-list" id="file-list"></div>
 
-      <div class="form-group" style="margin-top: 24px;">
-        <label for="brief">Ad Campaign Description / Goal</label>
+      <!-- Campaign details form -->
+      <div class="form-group">
+        <label for="brief">Product Pitch & Campaign Goal</label>
         <textarea id="brief" placeholder="Describe the ad campaign goals, key selling points, target audience, and mood (e.g. 'A sleek vertical ad for a wireless headset, warm cinematic mood, focus on active noise canceling')."></textarea>
       </div>
 
@@ -378,7 +475,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="duration">Ad Duration</label>
+          <label for="duration">Ad Duration (Sec)</label>
           <select id="duration">
             <option value="60">60 Seconds (Standard)</option>
             <option value="30">30 Seconds (Social Edit)</option>
@@ -387,34 +484,85 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="name">Project Name</label>
-        <input type="text" id="name" value="my_ad_campaign" placeholder="e.g. my_ad_campaign">
+      <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px;">
+        <div class="form-group">
+          <label for="name">Project Name</label>
+          <input type="text" id="name" value="my_ad_campaign" placeholder="e.g. my_ad_campaign">
+        </div>
+        <div class="form-group">
+          <label for="theme">Overlay Theme</label>
+          <select id="theme">
+            <option value="bold">Bold Kinetic</option>
+            <option value="cyberpunk">Cyberpunk Neon</option>
+            <option value="minimal">Minimalist Slate</option>
+          </select>
+        </div>
       </div>
 
-      <button class="btn" id="generate-btn" disabled>
-        Produce Ad Campaign
+      <button class="btn" id="plan-btn" disabled>
+        Analyze Clips & Draft Plan
       </button>
     </div>
 
-    <!-- Right Panel: Live Logs / Render Output -->
-    <div class="card terminal-container">
-      <h2 class="section-title">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
-        Production Board
-      </h2>
+    <!-- Right Panel: Interactive Editor & Video Render Console -->
+    <div class="card" id="right-card">
+      <!-- Editor Panel (Shown after Analysis & Plan completes) -->
+      <div id="editor-panel" style="display: none; flex-direction: column; gap: 20px;">
+        <h2 class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path></svg>
+          Ad Copy & Scene Editor
+        </h2>
 
-      <div class="terminal" id="terminal">
-        <div class="log-line system">Waiting for clips upload...</div>
+        <!-- Script Editor -->
+        <div class="editor-section">
+          <div class="editor-title">Copy & Voiceover</div>
+          <div class="form-group">
+            <label for="editor-ad-title">Intro Hook Title</label>
+            <input type="text" id="editor-ad-title">
+          </div>
+          <div class="form-group">
+            <label for="editor-ad-cta">Call to Action (CTA)</label>
+            <input type="text" id="editor-ad-cta">
+          </div>
+          <div class="form-group">
+            <label>Voiceover paragraphs</label>
+            <div id="paragraphs-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+          </div>
+        </div>
+
+        <!-- Timeline Cuts Editor -->
+        <div class="editor-section">
+          <div class="editor-title">Video Timeline Cuts</div>
+          <div class="scene-strip" id="scene-strip"></div>
+        </div>
+
+        <button class="btn" id="render-btn">
+          Produce & Compile Video Ad
+        </button>
+        <button class="btn btn-secondary" id="reset-editor-btn">
+          Back to Upload
+        </button>
       </div>
 
-      <!-- Preview Player -->
-      <div class="video-preview" id="video-preview">
-        <video id="player" controls playsinline></video>
-        <a href="#" class="download-btn" id="download-btn" download>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Download Final Ad
-        </a>
+      <!-- Logs / Render console (Shown when processing/idle) -->
+      <div id="console-panel" style="display: flex; flex-direction: column; gap: 20px;">
+        <h2 class="section-title">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          Production Board
+        </h2>
+
+        <div class="terminal" id="terminal">
+          <div class="log-line system">Waiting for clips upload...</div>
+        </div>
+
+        <!-- Preview Player -->
+        <div class="video-preview" id="video-preview">
+          <video id="player" controls playsinline></video>
+          <a href="#" class="download-btn" id="download-btn" download>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download Final Ad
+          </a>
+        </div>
       </div>
     </div>
   </main>
@@ -423,7 +571,9 @@
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const fileList = document.getElementById('file-list');
-    const generateBtn = document.getElementById('generate-btn');
+    const planBtn = document.getElementById('plan-btn');
+    const renderBtn = document.getElementById('render-btn');
+    const resetEditorBtn = document.getElementById('reset-editor-btn');
     const terminal = document.getElementById('terminal');
     const videoPreview = document.getElementById('video-preview');
     const player = document.getElementById('player');
@@ -432,8 +582,19 @@
     const lutInput = document.getElementById('lut');
     const durationInput = document.getElementById('duration');
     const nameInput = document.getElementById('name');
+    const themeInput = document.getElementById('theme');
 
-    let uploadedFilesList = [];
+    const editorPanel = document.getElementById('editor-panel');
+    const consolePanel = document.getElementById('console-panel');
+    const paragraphsContainer = document.getElementById('paragraphs-container');
+    const sceneStrip = document.getElementById('scene-strip');
+
+    const editorAdTitle = document.getElementById('editor-ad-title');
+    const editorAdCta = document.getElementById('editor-ad-cta');
+
+    let analyzedClips = [];
+    let currentTimeline = [];
+    let currentScript = {};
 
     // Trigger file dialog
     dropZone.addEventListener('click', () => fileInput.click());
@@ -473,7 +634,7 @@
 
     async function handleUpload(files) {
       log('Preparing files for upload...', 'system');
-      generateBtn.disabled = true;
+      planBtn.disabled = true;
       fileList.innerHTML = '';
       
       const formData = new FormData();
@@ -494,66 +655,258 @@
         });
         const data = await res.json();
         log(`Successfully uploaded ${data.files.length} video clips to sandbox.`, 'success');
-        uploadedFilesList = data.files;
-        generateBtn.disabled = false;
+        planBtn.disabled = false;
       } catch (err) {
         log(`Upload failed: ${err.message}`, 'error');
       }
     }
 
-    generateBtn.addEventListener('click', () => {
+    // Step 1: Analyze clips & draft plan
+    planBtn.addEventListener('click', async () => {
+      const brief = briefInput.value.trim();
+      const duration = parseFloat(durationInput.value);
+
+      if (!brief) {
+        alert('Please describe your ad campaign pitch first.');
+        return;
+      }
+
+      planBtn.disabled = true;
+      log('Analyzing uploaded video clips (Multi-modal analysis)...', 'system');
+
+      try {
+        // 1. Trigger API Analysis
+        const analysisRes = await fetch('/api/analyze', { method: 'POST' });
+        if (!analysisRes.ok) {
+          throw new Error(await analysisRes.text());
+        }
+        const analysisData = await analysisRes.json();
+        analyzedClips = analysisData.clips;
+        log(`Successfully analyzed ${analyzedClips.length} video files.`, 'success');
+
+        // 2. Trigger Campaign Planning
+        log('Generating ad voiceover copy and timeline cuts...', 'system');
+        const planRes = await fetch('/api/plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brief,
+            duration,
+            clips: analyzedClips
+          })
+        });
+        if (!planRes.ok) {
+          throw new Error(await planRes.text());
+        }
+        const planData = await planRes.json();
+        currentTimeline = planData.timeline;
+        currentScript = planData.script;
+
+        log('Campaign draft generated! Launching Editor Panel...', 'success');
+        loadEditor();
+      } catch (err) {
+        log(`Planning failed: ${err.message}`, 'error');
+        planBtn.disabled = false;
+      }
+    });
+
+    // Populate the script & cuts editing panels
+    function loadEditor() {
+      // Show Editor Panel, Hide initial Console layout
+      editorPanel.style.display = 'flex';
+      consolePanel.style.display = 'none';
+
+      // 1. Load Copy Fields
+      editorAdTitle.value = currentScript.title || 'AdForge Campaign';
+      editorAdCta.value = currentScript.cta_text || 'Shop Now';
+
+      paragraphsContainer.innerHTML = '';
+      const paragraphs = currentScript.voiceover_paragraphs || [];
+      paragraphs.forEach((text, i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'form-group';
+        wrap.innerHTML = `
+          <label style="font-size:0.8rem">Paragraph ${i + 1}</label>
+          <textarea class="para-input" data-index="${i}">${text}</textarea>
+        `;
+        paragraphsContainer.appendChild(wrap);
+      });
+
+      // 2. Load Timeline cuts
+      renderTimelineStrip();
+    }
+
+    function renderTimelineStrip() {
+      sceneStrip.innerHTML = '';
+      currentTimeline.forEach((scene, i) => {
+        const card = document.createElement('div');
+        card.className = 'scene-card';
+        card.innerHTML = `
+          <div class="scene-index">${i + 1}</div>
+          <div class="scene-details">
+            <span class="scene-path">${scene.filename}</span>
+            <div class="form-group" style="margin-top: 4px;">
+              <label style="font-size: 0.7rem;">Subtitles Overlay</label>
+              <input type="text" class="scene-subtitle" data-index="${i}" value="${scene.caption_text || ''}">
+            </div>
+            <div class="scene-times">
+              <div>
+                <label>Start (s):</label>
+                <input type="number" class="scene-start" data-index="${i}" step="0.5" value="${scene.start}">
+              </div>
+              <div>
+                <label>End (s):</label>
+                <input type="number" class="scene-end" data-index="${i}" step="0.5" value="${scene.end}">
+              </div>
+            </div>
+          </div>
+          <div class="scene-controls">
+            <button class="scene-btn" onclick="moveScene(${i}, -1)">↑</button>
+            <button class="scene-btn" onclick="moveScene(${i}, 1)">↓</button>
+            <button class="scene-btn delete" onclick="deleteScene(${i})">✕</button>
+          </div>
+        `;
+        sceneStrip.appendChild(card);
+      });
+    }
+
+    // Reorder cuts inside timeline
+    window.moveScene = function(index, direction) {
+      const target = index + direction;
+      if (target < 0 || target >= currentTimeline.length) return;
+      
+      const temp = currentTimeline[index];
+      currentTimeline[index] = currentTimeline[target];
+      currentTimeline[target] = temp;
+      
+      renderTimelineStrip();
+    };
+
+    window.deleteScene = function(index) {
+      if (currentTimeline.length <= 1) {
+        alert('You must have at least 1 clip segment in the timeline.');
+        return;
+      }
+      currentTimeline.splice(index, 1);
+      renderTimelineStrip();
+    };
+
+    resetEditorBtn.addEventListener('click', () => {
+      editorPanel.style.display = 'none';
+      consolePanel.style.display = 'flex';
+      planBtn.disabled = false;
+    });
+
+    // Step 2: Save drafts and trigger Render
+    renderBtn.addEventListener('click', async () => {
+      // 1. Gather edited copy
+      currentScript.title = editorAdTitle.value.trim();
+      currentScript.cta_text = editorAdCta.value.trim();
+
+      const paraTextareas = document.querySelectorAll('.para-input');
+      const paragraphs = [];
+      paraTextareas.forEach(ta => {
+        paragraphs.push(ta.value.trim());
+      });
+      currentScript.voiceover_paragraphs = paragraphs;
+
+      // 2. Gather edited timeline values
+      const subtitleInputs = document.querySelectorAll('.scene-subtitle');
+      subtitleInputs.forEach(input => {
+        const idx = parseInt(input.dataset.index);
+        if (currentTimeline[idx]) {
+          currentTimeline[idx].caption_text = input.value.trim();
+        }
+      });
+
+      const startInputs = document.querySelectorAll('.scene-start');
+      startInputs.forEach(input => {
+        const idx = parseInt(input.dataset.index);
+        if (currentTimeline[idx]) {
+          currentTimeline[idx].start = parseFloat(input.value);
+        }
+      });
+
+      const endInputs = document.querySelectorAll('.scene-end');
+      endInputs.forEach(input => {
+        const idx = parseInt(input.dataset.index);
+        if (currentTimeline[idx]) {
+          currentTimeline[idx].end = parseFloat(input.value);
+        }
+      });
+
+      const theme = themeInput.value;
       const brief = briefInput.value.trim();
       const lut = lutInput.value;
       const duration = durationInput.value;
       const name = nameInput.value.trim().replace(/\s+/g, '_') || 'adforge_ad';
 
-      if (!brief) {
-        alert('Please describe your ad campaign.');
-        return;
-      }
-
-      generateBtn.disabled = true;
+      // Switch view back to console to display logs
+      editorPanel.style.display = 'none';
+      consolePanel.style.display = 'flex';
+      terminal.innerHTML = '';
       videoPreview.style.display = 'none';
       player.src = '';
-      terminal.innerHTML = '';
-      
-      log('Initializing campaign workspace...', 'system');
-      
-      // Setup Server-Sent Events (SSE)
-      const queryParams = new URLSearchParams({ brief, duration, lut, name });
-      const eventSource = new EventSource(`/generate?${queryParams.toString()}`);
 
-      eventSource.onmessage = (event) => {
-        const line = event.data;
-        if (line) {
-          log(line);
+      log('Saving customized script & cuts edits as campaign draft...', 'system');
+
+      try {
+        // 3. Save Draft on Backend
+        const saveRes = await fetch('/api/save_draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            timeline: currentTimeline,
+            script: currentScript,
+            theme
+          })
+        });
+
+        if (!saveRes.ok) {
+          throw new Error(await saveRes.text());
         }
-      };
 
-      eventSource.addEventListener('done', (event) => {
-        const filename = event.data;
-        log(`Production rendering finished! Output saved as: ${filename}`, 'success');
-        eventSource.close();
-        generateBtn.disabled = false;
+        log('Draft saved successfully. Initiating rendering process...', 'success');
 
-        // Setup player
-        player.src = `/output/${filename}`;
-        downloadBtn.href = `/output/${filename}`;
-        videoPreview.style.display = 'flex';
-      });
+        // 4. Connect to SSE /generate endpoint
+        const queryParams = new URLSearchParams({ brief, duration, lut, name });
+        const eventSource = new EventSource(`/generate?${queryParams.toString()}`);
 
-      eventSource.addEventListener('error', (event) => {
-        const err = event.data || 'An error occurred during rendering.';
-        log(`Pipeline process failed: ${err}`, 'error');
-        eventSource.close();
-        generateBtn.disabled = false;
-      });
+        eventSource.onmessage = (event) => {
+          const line = event.data;
+          if (line) {
+            log(line);
+          }
+        };
 
-      eventSource.onerror = () => {
-        log('SSE Connection closed.', 'system');
-        eventSource.close();
-        generateBtn.disabled = false;
-      };
+        eventSource.addEventListener('done', (event) => {
+          const filename = event.data;
+          log(`Video ad created successfully: ${filename}`, 'success');
+          eventSource.close();
+          planBtn.disabled = false;
+
+          player.src = `/output/${filename}`;
+          downloadBtn.href = `/output/${filename}`;
+          videoPreview.style.display = 'flex';
+        });
+
+        eventSource.addEventListener('error', (event) => {
+          const err = event.data || 'An error occurred during rendering.';
+          log(`Pipeline compilation failed: ${err}`, 'error');
+          eventSource.close();
+          planBtn.disabled = false;
+        });
+
+        eventSource.onerror = () => {
+          log('Connection closed.', 'system');
+          eventSource.close();
+          planBtn.disabled = false;
+        };
+
+      } catch (err) {
+        log(`Save & Render failed: ${err.message}`, 'error');
+        planBtn.disabled = false;
+      }
     });
   </script>
 </body>

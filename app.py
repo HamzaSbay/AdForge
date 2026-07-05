@@ -8,6 +8,8 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from typing import List, Dict, Any
 from pipeline.orchestrator import AdForgeOrchestrator
 
 app = FastAPI(title="AdForge Studio")
@@ -65,13 +67,100 @@ async def upload_files(files: list[UploadFile] = File(...)):
             
     return {"message": "Files uploaded successfully", "files": uploaded_files}
 
+@app.post("/api/analyze")
+def analyze_uploaded_clips():
+    """Scan and analyze all uploaded clips, returning metadata and descriptions."""
+    allowed_exts = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
+    clips_paths = [
+        str(p) for p in UPLOAD_DIR.iterdir()
+        if p.suffix.lower() in allowed_exts and p.is_file()
+    ]
+    if not clips_paths:
+        raise HTTPException(status_code=400, detail="No video files uploaded yet.")
+    
+    orchestrator = AdForgeOrchestrator(str(BASE_DIR))
+    analyzed_clips = []
+    for path in clips_paths:
+        try:
+            res = orchestrator.analyzer.analyze_clip(path)
+            if "error" not in res:
+                analyzed_clips.append(res)
+        except Exception as e:
+            print(f"Analysis failed for {path}: {e}")
+            
+    if not analyzed_clips:
+        raise HTTPException(status_code=500, detail="Failed to analyze any of the uploaded files.")
+        
+    return {"clips": analyzed_clips}
+
+class PlanRequest(BaseModel):
+    brief: str
+    duration: float = 60.0
+    clips: List[Dict[str, Any]]
+
+@app.post("/api/plan")
+def plan_campaign_timeline(req: PlanRequest):
+    """Generate script and timeline cuts based on analyzed clips and brief."""
+    orchestrator = AdForgeOrchestrator(str(BASE_DIR))
+    try:
+        timeline = orchestrator.selector.create_timeline(req.clips, req.brief, target_duration=req.duration)
+        script = orchestrator.scriptwriter.write_script(timeline, req.brief, target_duration=req.duration)
+        return {"timeline": timeline, "script": script}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate campaign plan: {e}")
+
+class DraftRequest(BaseModel):
+    timeline: List[Dict[str, Any]]
+    script: Dict[str, Any]
+    theme: str = "bold"
+
+@app.post("/api/save_draft")
+def save_campaign_draft(req: DraftRequest):
+    """Temporarily save pre-approved timeline, script, and theme to workspace drafts."""
+    import json
+    draft_script_path = BASE_DIR / "workspace" / "draft_script.json"
+    draft_timeline_path = BASE_DIR / "workspace" / "draft_timeline.json"
+    draft_theme_path = BASE_DIR / "workspace" / "draft_theme.txt"
+    
+    try:
+        with open(draft_script_path, "w", encoding="utf-8") as f:
+            json.dump(req.script, f, indent=2)
+        with open(draft_timeline_path, "w", encoding="utf-8") as f:
+            json.dump(req.timeline, f, indent=2)
+        draft_theme_path.write_text(req.theme.strip(), encoding="utf-8")
+        return {"status": "ok", "message": "Draft saved successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save draft files: {e}")
+
 @app.get("/generate")
 def generate_ad(brief: str, duration: float = 60.0, lut: str = "cinematic", name: str = "adforge_ad"):
     """
     Run the production pipeline and stream logs to the client using SSE.
+    If draft files exist, it reads and injects them to bypass AI generation.
     """
+    import json
     log_queue = queue.Queue()
     
+    # Check for pre-existing drafts
+    draft_script_path = BASE_DIR / "workspace" / "draft_script.json"
+    draft_timeline_path = BASE_DIR / "workspace" / "draft_timeline.json"
+    draft_theme_path = BASE_DIR / "workspace" / "draft_theme.txt"
+    
+    draft_script = None
+    draft_timeline = None
+    theme = "bold"
+    
+    if draft_script_path.exists() and draft_timeline_path.exists():
+        try:
+            with open(draft_script_path, "r", encoding="utf-8") as f:
+                draft_script = json.load(f)
+            with open(draft_timeline_path, "r", encoding="utf-8") as f:
+                draft_timeline = json.load(f)
+            if draft_theme_path.exists():
+                theme = draft_theme_path.read_text(encoding="utf-8").strip()
+        except Exception as e:
+            print(f"Warning: Failed to load draft files ({e}). Falling back to standard generation.")
+            
     def run_pipeline():
         # Redirect stdout to capture all prints
         old_stdout = sys.stdout
@@ -84,8 +173,17 @@ def generate_ad(brief: str, duration: float = 60.0, lut: str = "cinematic", name
                 brief=brief,
                 duration=duration,
                 lut_name=lut,
-                project_name=name
+                project_name=name,
+                draft_script=draft_script,
+                draft_timeline=draft_timeline,
+                theme=theme
             )
+            
+            # Clean up drafts after successful production
+            for p in [draft_script_path, draft_timeline_path, draft_theme_path]:
+                if p.exists():
+                    p.unlink()
+                    
             # Signal success and return filename
             filename = Path(output_file).name
             log_queue.put(f"SUCCESS:{filename}")

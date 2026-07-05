@@ -31,45 +31,50 @@ class AdForgeOrchestrator:
         self.mixer = AudioMixer(str(self.workspace_dir / "mixer"))
         self.renderer = AdRenderer(str(self.workspace_dir / "remotion"))
 
-    def run(self, clips_dir: str, brief: str, duration: float = 60.0, lut_name: str = "cinematic", project_name: str = "adforge_ad") -> str:
+    def run(self, clips_dir: str, brief: str, duration: float = 60.0, lut_name: str = "cinematic", project_name: str = "adforge_ad", draft_script: dict = None, draft_timeline: list = None, theme: str = "bold") -> str:
         """Run the full video generation pipeline."""
         print(f"=== Starting AdForge Video Production: {project_name} ===")
         
-        # Step 1: Scan for video clips
-        allowed_exts = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
-        clips_paths = [
-            str(p) for p in Path(clips_dir).iterdir()
-            if p.suffix.lower() in allowed_exts and p.is_file()
-        ]
-        
-        if not clips_paths:
-            raise ValueError(f"No valid video clips found in {clips_dir}")
+        if draft_script and draft_timeline:
+            print("Pre-approved draft script and timeline cuts found. Bypassing AI generator steps.")
+            timeline = draft_timeline
+            script = draft_script
+        else:
+            # Step 1: Scan for video clips
+            allowed_exts = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
+            clips_paths = [
+                str(p) for p in Path(clips_dir).iterdir()
+                if p.suffix.lower() in allowed_exts and p.is_file()
+            ]
             
-        print(f"Found {len(clips_paths)} video clips to analyze.")
-        
-        # Step 2: Multi-modal clip analysis
-        analyzed_clips = []
-        for path in clips_paths:
-            res = self.analyzer.analyze_clip(path)
-            if "error" not in res:
-                analyzed_clips.append(res)
+            if not clips_paths:
+                raise ValueError(f"No valid video clips found in {clips_dir}")
                 
-        if not analyzed_clips:
-            raise RuntimeError("None of the clips could be successfully analyzed.")
+            print(f"Found {len(clips_paths)} video clips to analyze.")
             
-        # Save analysis data for debugging
-        with open(self.workspace_dir / "analyzed_clips.json", "w") as f:
-            json.dump(analyzed_clips, f, indent=2)
-            
-        # Step 3: AI Timeline cuts planning
-        timeline = self.selector.create_timeline(analyzed_clips, brief, target_duration=duration)
-        with open(self.workspace_dir / "timeline.json", "w") as f:
-            json.dump(timeline, f, indent=2)
-            
-        # Step 4: AI Script & copy writing
-        script = self.scriptwriter.write_script(timeline, brief, target_duration=duration)
-        with open(self.workspace_dir / "script.json", "w") as f:
-            json.dump(script, f, indent=2)
+            # Step 2: Multi-modal clip analysis
+            analyzed_clips = []
+            for path in clips_paths:
+                res = self.analyzer.analyze_clip(path)
+                if "error" not in res:
+                    analyzed_clips.append(res)
+                    
+            if not analyzed_clips:
+                raise RuntimeError("None of the clips could be successfully analyzed.")
+                
+            # Save analysis data for debugging
+            with open(self.workspace_dir / "analyzed_clips.json", "w") as f:
+                json.dump(analyzed_clips, f, indent=2)
+                
+            # Step 3: AI Timeline cuts planning
+            timeline = self.selector.create_timeline(analyzed_clips, brief, target_duration=duration)
+            with open(self.workspace_dir / "timeline.json", "w") as f:
+                json.dump(timeline, f, indent=2)
+                
+            # Step 4: AI Script & copy writing
+            script = self.scriptwriter.write_script(timeline, brief, target_duration=duration)
+            with open(self.workspace_dir / "script.json", "w") as f:
+                json.dump(script, f, indent=2)
             
         # Step 5: Narration Voice synthesis
         final_narr_audio = self.narrator.generate_aligned_voiceover(
@@ -109,7 +114,8 @@ class AdForgeOrchestrator:
             scene_titles=scene_titles,
             scene_durations=scene_durations,
             cta_text=script.get("cta_text", "Learn More"),
-            duration_sec=duration
+            duration_sec=duration,
+            theme=theme
         )
         
         # Step 11: Overlay Remotion graphics onto video

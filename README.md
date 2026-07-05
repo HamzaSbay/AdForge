@@ -62,7 +62,7 @@ Make sure you have these installed globally:
 
 ### 1. Clone the project
 ```bash
-git clone https://github.com/yourusername/AdForge.git
+git clone https://github.com/HamzaSbay/AdForge.git
 cd AdForge
 ```
 

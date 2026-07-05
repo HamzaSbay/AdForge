@@ -73,3 +73,67 @@ def test_orchestrator_pipeline_flow(mock_clips_data, tmp_path):
     orchestrator.renderer.render_remotion_overlays.assert_called_once()
     orchestrator.renderer.merge_overlays.assert_called_once()
     orchestrator.mixer.mix_audio.assert_called_once()
+
+
+def test_orchestrator_pipeline_bypass_flow(tmp_path):
+    base_dir = str(tmp_path)
+    orchestrator = AdForgeOrchestrator(base_dir)
+
+    # Set up mocks for steps starting at Step 5
+    orchestrator.analyzer.analyze_clip = MagicMock()
+    orchestrator.selector.create_timeline = MagicMock()
+    orchestrator.scriptwriter.write_script = MagicMock()
+
+    orchestrator.narrator.generate_aligned_voiceover = MagicMock(return_value=f"{base_dir}/workspace/audio/final_narration.mp3")
+    orchestrator.music.search_and_download = MagicMock(return_value=f"{base_dir}/workspace/audio/music.mp3")
+    orchestrator.grader.grade_and_crop = MagicMock(return_value=f"{base_dir}/workspace/graded/scene_0_graded.mp4")
+    orchestrator.editor.trim_clip = MagicMock(return_value=f"{base_dir}/workspace/editor/scene_0_trimmed.mp4")
+    orchestrator.editor.stitch_clips = MagicMock(return_value=f"{base_dir}/workspace/assembled_raw.mp4")
+    orchestrator.renderer.render_remotion_overlays = MagicMock(return_value=f"{base_dir}/workspace/overlays_raw.mp4")
+    orchestrator.renderer.merge_overlays = MagicMock(return_value=f"{base_dir}/workspace/video_with_overlays.mp4")
+    orchestrator.mixer.mix_audio = MagicMock(return_value=f"{base_dir}/output/test_project_bypass.mp4")
+
+    draft_script = {
+        "title": "Bypass Ad",
+        "voiceover_paragraphs": ["Edited speech paragraph."],
+        "overlay_titles": ["Edited Subtitle"],
+        "cta_text": "Join Now",
+        "music_mood": "cyberpunk synth"
+    }
+
+    draft_timeline = [
+        {"path": "clip1.mp4", "filename": "clip1.mp4", "start": 1.0, "end": 4.0, "caption_text": "Edited Subtitle"}
+    ]
+
+    output_path = orchestrator.run(
+        clips_dir=base_dir,
+        brief="Test brief",
+        duration=10.0,
+        lut_name="cool_tech",
+        project_name="test_project_bypass",
+        draft_script=draft_script,
+        draft_timeline=draft_timeline,
+        theme="cyberpunk"
+    )
+
+    import os
+    assert os.path.normpath(output_path) == os.path.normpath(f"{base_dir}/output/test_project_bypass.mp4")
+    
+    # Analyzer/Selector/Scriptwriter should NEVER have been called!
+    orchestrator.analyzer.analyze_clip.assert_not_called()
+    orchestrator.selector.create_timeline.assert_not_called()
+    orchestrator.scriptwriter.write_script.assert_not_called()
+
+    # Audio synthesis and overlays rendering SHOULD have been called with parameters!
+    orchestrator.narrator.generate_aligned_voiceover.assert_called_once()
+    
+    orchestrator.renderer.render_remotion_overlays.assert_called_once()
+    args, kwargs = orchestrator.renderer.render_remotion_overlays.call_args
+    assert os.path.normpath(kwargs["video_path"]) == os.path.normpath(f"{base_dir}/workspace/assembled_raw.mp4")
+    assert kwargs["title"] == "Bypass Ad"
+    assert kwargs["scene_titles"] == ["Edited Subtitle"]
+    assert kwargs["scene_durations"] == [3.0]
+    assert kwargs["cta_text"] == "Join Now"
+    assert kwargs["duration_sec"] == 10.0
+    assert kwargs["theme"] == "cyberpunk"
+

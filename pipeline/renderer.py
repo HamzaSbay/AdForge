@@ -8,9 +8,9 @@ class AdRenderer:
         self.workspace_dir = Path(workspace_dir)
         self.workspace_dir.mkdir(parents=True, exist_ok=True)
 
-    def render_remotion_overlays(self, video_path: str, title: str, scene_titles: list[str], scene_durations: list[float], cta_text: str, duration_sec: float) -> str:
+    def render_remotion_overlays(self, video_path: str, title: str, scene_titles: list[str], scene_durations: list[float], cta_text: str, duration_sec: float, theme: str = "bold") -> str:
         """Render React overlays combined with the background video using Remotion."""
-        print("Rendering Remotion animated overlays on top of background video...")
+        print(f"Rendering Remotion animated overlays (theme: {theme}) on top of background video...")
         
         props_path = self.workspace_dir / "remotion_props.json"
         overlay_mp4 = self.workspace_dir / "overlays_raw.mp4"
@@ -25,7 +25,8 @@ class AdRenderer:
             "title": title,
             "sceneTitles": scene_titles,
             "sceneDurations": scene_durations,
-            "ctaText": cta_text
+            "ctaText": cta_text,
+            "theme": theme
         }
         
         with open(props_path, "w") as f:

@@ -8,7 +8,7 @@ Thank you for your interest in contributing to **AdForge**! We want to build a h
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/AdForge.git
+   git clone https://github.com/HamzaSbay/AdForge.git
    cd AdForge
    ```
 
