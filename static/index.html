@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdForge Studio — AI Video Ad Production</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top left, #0b0f19, #05070c);
+      --panel-bg: rgba(13, 20, 35, 0.45);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.3);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    header h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      font-weight: 300;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 850px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Drag and Drop Zone */
+    .drop-zone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.02);
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .drop-zone svg {
+      width: 48px;
+      height: 48px;
+      stroke: var(--primary);
+      fill: none;
+      transition: transform 0.3s ease;
+    }
+
+    .drop-zone:hover svg {
+      transform: translateY(-5px);
+    }
+
+    .drop-zone p {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .drop-zone span {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .file-list {
+      margin-top: 16px;
+      max-height: 120px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-item {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .file-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 80%;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Action Button */
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 20px var(--primary-glow);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 25px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn:disabled {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.25);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Live Output & Video Player */
+    .terminal-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 400px;
+    }
+
+    .terminal {
+      flex: 1;
+      background: #030712;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.9rem;
+      color: #38bdf8;
+      overflow-y: auto;
+      max-height: 380px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .terminal::-webkit-scrollbar {
+      width: 6px;
+    }
+    .terminal::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .log-line {
+      line-height: 1.4;
+      animation: fadeIn 0.2s ease forwards;
+    }
+    
+    .log-line.system { color: #facc15; }
+    .log-line.error { color: #ef4444; }
+    .log-line.success { color: var(--accent); }
+
+    .video-preview {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .video-preview video {
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 9/16;
+      border-radius: 16px;
+      border: 2px solid var(--accent);
+      box-shadow: 0 15px 30px var(--accent-glow);
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+      box-shadow: 0 10px 20px var(--accent-glow);
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 25px rgba(16, 185, 129, 0.5);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>AdForge Studio</h1>
+    <p>Upload clips, describe your vision, and render a high-converting, professional 9:16 video ad locally.</p>
+  </header>
+
+  <main>
+    <!-- Left Panel: Form & Upload -->
+    <div class="card">
+      <h2 class="section-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><rect x="2" y="2" width="20" height="20" rx="4"></rect><path d="M12 18V6"></path><path d="M6 12h12"></path></svg>
+        New Campaign Brief
+      </h2>
+
+      <div class="drop-zone" id="drop-zone">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        <p>Drag & Drop your video clips here</p>
+        <span>Supports MP4, MOV, AVI</span>
+        <input type="file" id="file-input" multiple style="display: none;" accept="video/*">
+      </div>
+
+      <div class="file-list" id="file-list"></div>
+
+      <div class="form-group" style="margin-top: 24px;">
+        <label for="brief">Ad Campaign Description / Goal</label>
+        <textarea id="brief" placeholder="Describe the ad campaign goals, key selling points, target audience, and mood (e.g. 'A sleek vertical ad for a wireless headset, warm cinematic mood, focus on active noise canceling')."></textarea>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label for="lut">Color Grading LUT</label>
+          <select id="lut">
+            <option value="cinematic">Cinematic (Moody/Cool)</option>
+            <option value="warm_product">Warm Product (Vibrant/Golden)</option>
+            <option value="cool_tech">Cool Tech (Blueish/Minimal)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="duration">Ad Duration</label>
+          <select id="duration">
+            <option value="60">60 Seconds (Standard)</option>
+            <option value="30">30 Seconds (Social Edit)</option>
+            <option value="15">15 Seconds (Story/Short)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Project Name</label>
+        <input type="text" id="name" value="my_ad_campaign" placeholder="e.g. my_ad_campaign">
+      </div>
+
+      <button class="btn" id="generate-btn" disabled>
+        Produce Ad Campaign
+      </button>
+    </div>
+
+    <!-- Right Panel: Live Logs / Render Output -->
+    <div class="card terminal-container">
+      <h2 class="section-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Production Board
+      </h2>
+
+      <div class="terminal" id="terminal">
+        <div class="log-line system">Waiting for clips upload...</div>
+      </div>
+
+      <!-- Preview Player -->
+      <div class="video-preview" id="video-preview">
+        <video id="player" controls playsinline></video>
+        <a href="#" class="download-btn" id="download-btn" download>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Final Ad
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+    const generateBtn = document.getElementById('generate-btn');
+    const terminal = document.getElementById('terminal');
+    const videoPreview = document.getElementById('video-preview');
+    const player = document.getElementById('player');
+    const downloadBtn = document.getElementById('download-btn');
+    const briefInput = document.getElementById('brief');
+    const lutInput = document.getElementById('lut');
+    const durationInput = document.getElementById('duration');
+    const nameInput = document.getElementById('name');
+
+    let uploadedFilesList = [];
+
+    // Trigger file dialog
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Handle Drag & Drop
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleUpload(files);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        handleUpload(fileInput.files);
+      }
+    });
+
+    function log(message, type = '') {
+      const line = document.createElement('div');
+      line.className = `log-line ${type}`;
+      line.textContent = `> ${message}`;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    async function handleUpload(files) {
+      log('Preparing files for upload...', 'system');
+      generateBtn.disabled = true;
+      fileList.innerHTML = '';
+      
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+        
+        // Show in list
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `<span>${files[i].name}</span> <span style="color:#64748b">${(files[i].size / (1024 * 1024)).toFixed(1)} MB</span>`;
+        fileList.appendChild(item);
+      }
+
+      try {
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        log(`Successfully uploaded ${data.files.length} video clips to sandbox.`, 'success');
+        uploadedFilesList = data.files;
+        generateBtn.disabled = false;
+      } catch (err) {
+        log(`Upload failed: ${err.message}`, 'error');
+      }
+    }
+
+    generateBtn.addEventListener('click', () => {
+      const brief = briefInput.value.trim();
+      const lut = lutInput.value;
+      const duration = durationInput.value;
+      const name = nameInput.value.trim().replace(/\s+/g, '_') || 'adforge_ad';
+
+      if (!brief) {
+        alert('Please describe your ad campaign.');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      videoPreview.style.display = 'none';
+      player.src = '';
+      terminal.innerHTML = '';
+      
+      log('Initializing campaign workspace...', 'system');
+      
+      // Setup Server-Sent Events (SSE)
+      const queryParams = new URLSearchParams({ brief, duration, lut, name });
+      const eventSource = new EventSource(`/generate?${queryParams.toString()}`);
+
+      eventSource.onmessage = (event) => {
+        const line = event.data;
+        if (line) {
+          log(line);
+        }
+      };
+
+      eventSource.addEventListener('done', (event) => {
+        const filename = event.data;
+        log(`Production rendering finished! Output saved as: ${filename}`, 'success');
+        eventSource.close();
+        generateBtn.disabled = false;
+
+        // Setup player
+        player.src = `/output/${filename}`;
+        downloadBtn.href = `/output/${filename}`;
+        videoPreview.style.display = 'flex';
+      });
+
+      eventSource.addEventListener('error', (event) => {
+        const err = event.data || 'An error occurred during rendering.';
+        log(`Pipeline process failed: ${err}`, 'error');
+        eventSource.close();
+        generateBtn.disabled = false;
+      });
+
+      eventSource.onerror = () => {
+        log('SSE Connection closed.', 'system');
+        eventSource.close();
+        generateBtn.disabled = false;
+      };
+    });
+  </script>
+</body>
+</html>
