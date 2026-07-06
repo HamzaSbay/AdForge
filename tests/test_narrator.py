@@ -36,37 +36,50 @@ def test_narrator_edge_tts():
 def test_narrator_offline_fallback():
     narrator = AdNarrator("workspace/remotion")
     
-    # We patch pythoncom, pyttsx3, and subprocess to simulate offline run without side effects
-    with patch.dict("os.environ", {}, clear=True), \
-         patch("pythoncom.CoInitialize", return_value=None), \
-         patch("pyttsx3.init") as mock_pyttsx3_init, \
-         patch("subprocess.run") as mock_sub_run:
-         
-        # Set up pyttsx3 engine mocks
-        mock_engine = MagicMock()
-        mock_pyttsx3_init.return_value = mock_engine
-        
-        def mock_wav_write(*args, **kwargs):
-            Path("workspace/remotion/test_speech.wav").touch()
+    # pythoncom is a Windows-only COM module. On Linux CI, it doesn't exist,
+    # so we inject a fake module into sys.modules before patching it.
+    import sys
+    fake_pythoncom = MagicMock()
+    pythoncom_existed = "pythoncom" in sys.modules
+    if not pythoncom_existed:
+        sys.modules["pythoncom"] = fake_pythoncom
+
+    try:
+        with patch.dict("os.environ", {}, clear=True), \
+             patch("pythoncom.CoInitialize", return_value=None), \
+             patch("pyttsx3.init") as mock_pyttsx3_init, \
+             patch("subprocess.run") as mock_sub_run:
+             
+            # Set up pyttsx3 engine mocks
+            mock_engine = MagicMock()
+            mock_pyttsx3_init.return_value = mock_engine
             
-        mock_engine.runAndWait.side_effect = mock_wav_write
-        
-        # Synthesize speech using local provider directly
-        out_path = "workspace/remotion/test_speech.mp3"
-        narrator.generate_speech("Hello offline world", out_path, provider_name="local")
-        
-        mock_pyttsx3_init.assert_called_once()
-        mock_engine.setProperty.assert_called_with('rate', 185)
-        mock_engine.save_to_file.assert_called_once()
-        mock_engine.runAndWait.assert_called_once()
-        
-        # Verify FFmpeg conversion command ran
-        assert mock_sub_run.call_count >= 1
-        cmd = mock_sub_run.call_args[0][0]
-        assert "ffmpeg" in cmd
-        assert "libmp3lame" in cmd
-        
-        # Cleanup
-        wav_path = Path("workspace/remotion/test_speech.wav")
-        if wav_path.exists():
-            wav_path.unlink()
+            def mock_wav_write(*args, **kwargs):
+                Path("workspace/remotion/test_speech.wav").touch()
+                
+            mock_engine.runAndWait.side_effect = mock_wav_write
+            
+            # Synthesize speech using local provider directly
+            out_path = "workspace/remotion/test_speech.mp3"
+            narrator.generate_speech("Hello offline world", out_path, provider_name="local")
+            
+            mock_pyttsx3_init.assert_called_once()
+            mock_engine.setProperty.assert_called_with('rate', 185)
+            mock_engine.save_to_file.assert_called_once()
+            mock_engine.runAndWait.assert_called_once()
+            
+            # Verify FFmpeg conversion command ran
+            assert mock_sub_run.call_count >= 1
+            cmd = mock_sub_run.call_args[0][0]
+            assert "ffmpeg" in cmd
+            assert "libmp3lame" in cmd
+            
+            # Cleanup
+            wav_path = Path("workspace/remotion/test_speech.wav")
+            if wav_path.exists():
+                wav_path.unlink()
+    finally:
+        # Remove fake module if we injected it
+        if not pythoncom_existed and "pythoncom" in sys.modules:
+            del sys.modules["pythoncom"]
+
