@@ -465,6 +465,7 @@
         <textarea id="brief" placeholder="Describe the ad campaign goals, key selling points, target audience, and mood (e.g. 'A sleek vertical ad for a wireless headset, warm cinematic mood, focus on active noise canceling')."></textarea>
       </div>
 
+      <!-- Dynamic Campaign settings grid -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div class="form-group">
           <label for="lut">Color Grading LUT</label>
@@ -476,15 +477,11 @@
         </div>
         <div class="form-group">
           <label for="duration">Ad Duration (Sec)</label>
-          <select id="duration">
-            <option value="60">60 Seconds (Standard)</option>
-            <option value="30">30 Seconds (Social Edit)</option>
-            <option value="15">15 Seconds (Story/Short)</option>
-          </select>
+          <input type="number" id="duration" min="5" max="180" value="30" style="padding: 13px 18px;">
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px;">
+      <div style="display: grid; grid-template-columns: 1.2fr 0.9fr 0.9fr; gap: 16px;">
         <div class="form-group">
           <label for="name">Project Name</label>
           <input type="text" id="name" value="my_ad_campaign" placeholder="e.g. my_ad_campaign">
@@ -496,6 +493,123 @@
             <option value="cyberpunk">Cyberpunk Neon</option>
             <option value="minimal">Minimalist Slate</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label for="aspect-ratio">Aspect Ratio</label>
+          <select id="aspect-ratio">
+            <option value="9:16">Vertical (9:16)</option>
+            <option value="16:9">Horizontal (16:9)</option>
+            <option value="1:1">Square (1:1)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label for="transition">Cinematic Transition</label>
+          <select id="transition">
+            <option value="none">None (Clean Cut)</option>
+            <option value="crossfade">Crossfade (Smooth)</option>
+            <option value="glitch">Glitch Flash (Cyberpunk)</option>
+            <option value="slide">Zoom Slide (Dynamic)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ai-engine">AI Copywriter Engine</label>
+          <select id="ai-engine">
+            <option value="google">Gemini 2.5 Flash</option>
+            <option value="openai">GPT-4o (OpenAI)</option>
+            <option value="anthropic">Claude 3.5 Sonnet</option>
+            <option value="ollama">Local Ollama</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label for="tts-provider">Voice Synthesis Engine</label>
+          <select id="tts-provider">
+            <option value="google">Google Cloud TTS</option>
+            <option value="edge">EdgeTTS (Free Cloud)</option>
+            <option value="local">Local offline (pyttsx3)</option>
+            <option value="openai">OpenAI TTS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tts-voice">Voice Speaker / Accent</label>
+          <select id="tts-voice">
+            <option value="en-US-Journey-D">Google Deep Male (Journey-D)</option>
+            <option value="en-US-Journey-F">Google Warm Female (Journey-F)</option>
+            <option value="en-US-Neural2-F">Google Standard Female (Neural2-F)</option>
+            <option value="en-US-GuyNeural">Edge Male (GuyNeural)</option>
+            <option value="en-US-AriaNeural">Edge Female (AriaNeural)</option>
+            <option value="en-US-AnaNeural">Edge Child (AnaNeural)</option>
+            <option value="alloy">OpenAI Alloy</option>
+            <option value="onyx">OpenAI Onyx</option>
+            <option value="shimmer">OpenAI Shimmer</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; border-top: 1px solid var(--panel-border); padding-top: 16px;">
+        <div class="form-group">
+          <label for="primary-color">Primary Color</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="color" id="primary-color" value="#3B82F6" style="width: 50px; height: 42px; padding: 2px; border: none; border-radius: 6px; background: transparent; cursor: pointer;">
+            <input type="text" id="primary-color-hex" value="#3B82F6" style="padding: 10px; flex-grow: 1; font-size: 0.9rem;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="accent-color">Accent Color</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="color" id="accent-color" value="#10B981" style="width: 50px; height: 42px; padding: 2px; border: none; border-radius: 6px; background: transparent; cursor: pointer;">
+            <input type="text" id="accent-color-hex" value="#10B981" style="padding: 10px; flex-grow: 1; font-size: 0.9rem;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="font-family">Brand Font</label>
+          <select id="font-family">
+            <option value="Space Grotesk">Space Grotesk</option>
+            <option value="Inter">Inter (Clean)</option>
+            <option value="Georgia">Georgia (Serif)</option>
+            <option value="Courier New">Courier (Mono)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; border-top: 1px solid var(--panel-border); padding-top: 16px;">
+        <div class="form-group">
+          <label for="custom-music-file">Custom Background Music</label>
+          <input type="file" id="custom-music-file" accept="audio/mp3,audio/*" style="font-size: 0.85rem; padding: 8px;">
+        </div>
+        <div class="form-group">
+          <label for="subtitles-preset">Subtitles Style</label>
+          <select id="subtitles-preset">
+            <option value="karaoke">Active Karaoke</option>
+            <option value="outlined">Bold Outlined</option>
+            <option value="slate">Slate Box</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Ducking customizer controls -->
+      <div style="border-top: 1px solid var(--panel-border); padding-top: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <label style="font-size: 0.8rem; margin-bottom: 2px;">Audio Ducking Customizer</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>Music Vol Ducking</span>
+              <span id="music-vol-val">8%</span>
+            </div>
+            <input type="range" id="music-volume" min="0" max="50" value="8" style="accent-color: var(--primary);">
+          </div>
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+              <span>Narration Vol</span>
+              <span id="narr-vol-val">115%</span>
+            </div>
+            <input type="range" id="narr-volume" min="50" max="200" value="115" style="accent-color: var(--primary);">
+          </div>
         </div>
       </div>
 
@@ -567,6 +681,19 @@
     </div>
   </main>
 
+  <!-- Sandbox Assets Explorer Card -->
+  <div class="card" style="width: 100%; max-width: 1200px; margin-top: 30px;">
+    <h2 class="section-title" style="margin-bottom: 20px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+      Local Sandbox Assets Explorer
+    </h2>
+    <div id="assets-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 100%;">
+      <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 0.95rem; padding: 20px 0;">
+        No compiled videos found yet. Complete a render cycle to see your files here!
+      </div>
+    </div>
+  </div>
+
   <script>
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
@@ -583,6 +710,23 @@
     const durationInput = document.getElementById('duration');
     const nameInput = document.getElementById('name');
     const themeInput = document.getElementById('theme');
+    const aspectInput = document.getElementById('aspect-ratio');
+    const transitionInput = document.getElementById('transition');
+    const aiEngineInput = document.getElementById('ai-engine');
+    const ttsProviderInput = document.getElementById('tts-provider');
+    const ttsVoiceInput = document.getElementById('tts-voice');
+    const primaryColorInput = document.getElementById('primary-color');
+    const primaryColorHexInput = document.getElementById('primary-color-hex');
+    const accentColorInput = document.getElementById('accent-color');
+    const accentColorHexInput = document.getElementById('accent-color-hex');
+    const fontFamilyInput = document.getElementById('font-family');
+    const customMusicFile = document.getElementById('custom-music-file');
+    const subtitlesPresetInput = document.getElementById('subtitles-preset');
+    const musicVolumeInput = document.getElementById('music-volume');
+    const narrVolumeInput = document.getElementById('narr-volume');
+    const musicVolVal = document.getElementById('music-vol-val');
+    const narrVolVal = document.getElementById('narr-vol-val');
+    const assetsList = document.getElementById('assets-list');
 
     const editorPanel = document.getElementById('editor-panel');
     const consolePanel = document.getElementById('console-panel');
@@ -624,6 +768,27 @@
       }
     });
 
+    // Sync color pickers with hex text inputs
+    primaryColorInput.addEventListener('input', () => {
+      primaryColorHexInput.value = primaryColorInput.value.toUpperCase();
+    });
+    primaryColorHexInput.addEventListener('input', () => {
+      const val = primaryColorHexInput.value.trim();
+      if (/^#[0-9A-F]{6}$/i.test(val)) {
+        primaryColorInput.value = val;
+      }
+    });
+
+    accentColorInput.addEventListener('input', () => {
+      accentColorHexInput.value = accentColorInput.value.toUpperCase();
+    });
+    accentColorHexInput.addEventListener('input', () => {
+      const val = accentColorHexInput.value.trim();
+      if (/^#[0-9A-F]{6}$/i.test(val)) {
+        accentColorInput.value = val;
+      }
+    });
+
     function log(message, type = '') {
       const line = document.createElement('div');
       line.className = `log-line ${type}`;
@@ -661,6 +826,15 @@
       }
     }
 
+    // Enable planBtn if brief has content (even without uploads)
+    briefInput.addEventListener('input', () => {
+      if (briefInput.value.trim().length > 0) {
+        planBtn.disabled = false;
+      } else if (fileList.children.length === 0) {
+        planBtn.disabled = true;
+      }
+    });
+
     // Step 1: Analyze clips & draft plan
     planBtn.addEventListener('click', async () => {
       const brief = briefInput.value.trim();
@@ -675,8 +849,12 @@
       log('Analyzing uploaded video clips (Multi-modal analysis)...', 'system');
 
       try {
-        // 1. Trigger API Analysis
-        const analysisRes = await fetch('/api/analyze', { method: 'POST' });
+        // 1. Trigger API Analysis with brief in body (for B-roll sourcing)
+        const analysisRes = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ brief })
+        });
         if (!analysisRes.ok) {
           throw new Error(await analysisRes.text());
         }
@@ -692,7 +870,9 @@
           body: JSON.stringify({
             brief,
             duration,
-            clips: analyzedClips
+            clips: analyzedClips,
+            model_provider: aiEngineInput.value,
+            model_name: '' // Empty lets backend choose default for provider
           })
         });
         if (!planRes.ok) {
@@ -836,10 +1016,20 @@
       });
 
       const theme = themeInput.value;
+      const primaryColor = primaryColorHexInput.value.trim();
+      const accentColor = accentColorHexInput.value.trim();
+      const fontFamily = fontFamilyInput.value;
+      const aspectRatio = aspectInput.value;
+      const transition = transitionInput.value;
       const brief = briefInput.value.trim();
       const lut = lutInput.value;
       const duration = durationInput.value;
       const name = nameInput.value.trim().replace(/\s+/g, '_') || 'adforge_ad';
+      const llmProvider = aiEngineInput.value;
+      const ttsProvider = ttsProviderInput.value;
+      const ttsVoice = ttsVoiceInput.value;
+      const musicVolume = parseFloat(musicVolumeInput.value) / 100.0;
+      const narrationVolume = parseFloat(narrVolumeInput.value) / 100.0;
 
       // Switch view back to console to display logs
       editorPanel.style.display = 'none';
@@ -858,7 +1048,12 @@
           body: JSON.stringify({
             timeline: currentTimeline,
             script: currentScript,
-            theme
+            theme,
+            transition,
+            aspect_ratio: aspectRatio,
+            primary_color: primaryColor,
+            accent_color: accentColor,
+            font_family: fontFamily
           })
         });
 
@@ -869,7 +1064,23 @@
         log('Draft saved successfully. Initiating rendering process...', 'success');
 
         // 4. Connect to SSE /generate endpoint
-        const queryParams = new URLSearchParams({ brief, duration, lut, name });
+        const queryParams = new URLSearchParams({
+          brief,
+          duration,
+          lut,
+          name,
+          theme,
+          transition,
+          llm_provider: llmProvider,
+          music_volume: musicVolume,
+          narration_volume: narrationVolume,
+          tts_provider: ttsProvider,
+          tts_voice: ttsVoice,
+          aspect_ratio: aspectRatio,
+          primary_color: primaryColor,
+          accent_color: accentColor,
+          font_family: fontFamily
+        });
         const eventSource = new EventSource(`/generate?${queryParams.toString()}`);
 
         eventSource.onmessage = (event) => {
@@ -888,6 +1099,7 @@
           player.src = `/output/${filename}`;
           downloadBtn.href = `/output/${filename}`;
           videoPreview.style.display = 'flex';
+          loadAssets();
         });
 
         eventSource.addEventListener('error', (event) => {
@@ -908,6 +1120,90 @@
         planBtn.disabled = false;
       }
     });
+
+    // Update volume range display values
+    musicVolumeInput.addEventListener('input', () => {
+      musicVolVal.textContent = `${musicVolumeInput.value}%`;
+    });
+    narrVolumeInput.addEventListener('input', () => {
+      narrVolVal.textContent = `${narrVolumeInput.value}%`;
+    });
+
+    // Upload custom music file on selection change
+    customMusicFile.addEventListener('change', async () => {
+      if (customMusicFile.files.length > 0) {
+        log('Uploading custom background music track...', 'system');
+        const formData = new FormData();
+        formData.append('file', customMusicFile.files[0]);
+        try {
+          const res = await fetch('/api/upload_music', {
+            method: 'POST',
+            body: formData
+          });
+          if (res.ok) {
+            const data = await res.json();
+            log(`Custom music "${data.filename}" uploaded successfully.`, 'success');
+          } else {
+            throw new Error(await res.text());
+          }
+        } catch (err) {
+          log(`Failed to upload custom music: ${err.message}`, 'error');
+        }
+      }
+    });
+
+    // Load compiled output assets into explorer
+    async function loadAssets() {
+      try {
+        const res = await fetch('/api/assets');
+        const data = await res.json();
+        const assets = data.assets || [];
+        
+        if (assets.length === 0) {
+          assetsList.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); font-size: 0.95rem; padding: 20px 0;">
+              No compiled videos found yet. Complete a render cycle to see your files here!
+            </div>
+          `;
+          return;
+        }
+
+        assetsList.innerHTML = assets.map(asset => `
+          <div class="file-item" style="flex-direction: column; align-items: stretch; gap: 12px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 600; font-size: 0.95rem; word-break: break-all; max-width: 75%;">${asset.name}</span>
+              <span style="color: var(--text-muted); font-size: 0.85rem;">${asset.size_mb} MB</span>
+            </div>
+            <video src="${asset.url}" controls style="width: 100%; border-radius: 8px; background: #000; max-height: 200px; object-fit: contain;"></video>
+            <div style="display: flex; gap: 10px; margin-top: 4px;">
+              <a href="${asset.url}" class="download-btn" style="flex: 1; padding: 8px 12px; font-size: 0.85rem;" download>Download</a>
+              <button class="btn btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 0.85rem; border-color: #ef4444; color: #ef4444;" onclick="deleteAsset('${asset.name}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load assets:', err);
+      }
+    }
+
+    // Delete asset
+    window.deleteAsset = async function(filename) {
+      if (!confirm(`Are you sure you want to delete ${filename}?`)) return;
+      try {
+        const res = await fetch(`/api/assets/${filename}`, { method: 'DELETE' });
+        if (res.ok) {
+          log(`Deleted asset: ${filename}`, 'system');
+          loadAssets();
+        } else {
+          log(`Failed to delete asset: ${await res.text()}`, 'error');
+        }
+      } catch (err) {
+        log(`Delete asset failed: ${err.message}`, 'error');
+      }
+    };
+
+    // Load assets on startup
+    loadAssets();
   </script>
 </body>
 </html>

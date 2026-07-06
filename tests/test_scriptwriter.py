@@ -11,7 +11,7 @@ def test_scriptwriter_offline_brand_and_theme():
         {"filename": "scene3.mp4", "start": 2.0, "end": 6.0}
     ]
     
-    with patch("pipeline.scriptwriter.api_key", None):
+    with patch.dict("os.environ", {}, clear=True):
         # Test baking theme detection and brand name capitalization extraction
         script = writer.write_script(
             timeline=dummy_timeline,

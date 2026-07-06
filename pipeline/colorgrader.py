@@ -50,6 +50,13 @@ class ClipColorGrader:
                 else:
                     crop_filter = "crop=iw:iw*16/9"
                 video_filter = f"{crop_filter},scale={target_w}:{target_h}"
+            elif aspect_ratio == "1:1":
+                # Target is square 1:1
+                if aspect > 1.0:
+                    crop_filter = "crop=ih:ih"
+                else:
+                    crop_filter = "crop=iw:iw"
+                video_filter = f"{crop_filter},scale=1080:1080"
             else:
                 # Target is horizontal 16:9
                 if aspect > (16.0 / 9.0):
@@ -59,7 +66,12 @@ class ClipColorGrader:
                 video_filter = f"{crop_filter},scale={target_h}:{target_w}"
         else:
             # Fallback if dimensions could not be read
-            video_filter = f"crop=ih*9/16:ih,scale={target_w}:{target_h}" if aspect_ratio == "9:16" else f"scale={target_h}:{target_w}"
+            if aspect_ratio == "9:16":
+                video_filter = f"crop=ih*9/16:ih,scale={target_w}:{target_h}"
+            elif aspect_ratio == "1:1":
+                video_filter = "crop=ih:ih,scale=1080:1080"
+            else:
+                video_filter = f"scale={target_h}:{target_w}"
         
         # 2. Add color grading options
         lut_file = Path(__file__).parent.parent / "luts" / f"{lut_name}.cube"

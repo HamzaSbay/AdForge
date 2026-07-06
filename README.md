@@ -22,15 +22,14 @@ Unlike typical video generation scripts, AdForge uses **Remotion** under the hoo
 
 ## 🚀 Key Features
 
-*   **🎬 Multi-Modal Video Analysis**: Uses Gemini 2.5 Flash to automatically index raw video clips, find visually striking scenes, score energy/action levels, and detect optimal start/end cut times.
-*   **✍️ AI Copywriter**: Generates engaging voiceover scripts, hooking titles, on-screen subtitles, and target music mood queries mapped directly to clip durations.
-*   **💻 Robust Offline Fallback Mode**: If your API key runs out of quota, AdForge automatically switches to a local mode:
-    *   *Smarter cuts selector:* Shuffles and slices clips at active mid-sections to fill target durations (e.g. 60s) dynamically.
-    *   *Template Copywriter:* Extracts brand keywords from your brief to build matching scripts and subtitles offline.
-    *   *Offline TTS:* Uses local SAPI5 voices (`pyttsx3`) with multi-thread COM safety.
-*   **🎨 Dynamic reframing & grading**: Automatically reframes horizontal (16:9) or vertical footage into target crops, applying custom LUT overlays and cinematic contrast EQ filters.
-*   **🎭 React-Based Overlays (Remotion)**: Compiles high-fidelity overlays (cards, lower thirds, call to actions) inside headless Chrome, rendering them directly on top of the video timeline.
-*   **🎵 Smart Audio Mixer**: Searches Pixabay for free commercial background tracks matching the AI's requested mood, ducking background volume to 8% during speech and fading out during the final CTA.
+*   **🎬 Multi-Modal Video Analysis**: Uses Gemini 2.5 Flash to index raw clips, score energy/action levels, and detect optimal start/end cut times.
+*   **🌐 Automated B-Roll Sourcing (Stock Video Finder)**: Enables generating ads without uploading any clips. Automatically queries and downloads high-quality portrait stock videos from Pexels, Pixabay, or scrapers.
+*   **🎙️ Pluggable Voice Synthesis (TTS)**: Synthesizes narration across multiple engines (Google Cloud Journey voices, free EdgeTTS cloud neural voices requiring no API keys, local offline pyttsx3, or OpenAI TTS).
+*   **✍️ AI Copywriter**: Generates engaging voiceover scripts, titles, and CTA actions mapped directly to segment durations.
+*   **🎨 Dynamic reframing & grading**: Centering & reframing horizontal (16:9) or vertical footage into target crops, applying custom LUT overlays and sharpening.
+*   **🎭 React-Based Overlays (Remotion)**: Headless rendering of titles, lower-thirds, active karaoke captions, and CTA cards directly on top of the timeline.
+*   **🎵 Smart Audio Mixer**: Searches Pixabay for free commercial background tracks or uses uploaded custom audio, automatically sidechain-ducking music volume during voiceovers.
+*   **🖥️ Web Campaign Studio**: Full visual dashboard to customize transitions (glitch, crossfade, slide), adjust volume levels, re-order scene timeline cuts, upload custom music tracks, and delete/play previously rendered ads in the Sandbox Assets Explorer.
 
 ---
 

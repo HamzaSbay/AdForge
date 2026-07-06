@@ -11,6 +11,8 @@ from pipeline.colorgrader import ClipColorGrader
 from pipeline.editor import AdEditor
 from pipeline.mixer import AudioMixer
 from pipeline.renderer import AdRenderer
+from pipeline.llm import LLMManager
+from pipeline.stockvideo import AdStockVideoManager
 
 class AdForgeOrchestrator:
     def __init__(self, base_dir: str):
@@ -31,9 +33,14 @@ class AdForgeOrchestrator:
         self.mixer = AudioMixer(str(self.workspace_dir / "mixer"))
         self.renderer = AdRenderer(str(self.workspace_dir / "remotion"))
 
-    def run(self, clips_dir: str, brief: str, duration: float = 60.0, lut_name: str = "cinematic", project_name: str = "adforge_ad", draft_script: dict = None, draft_timeline: list = None, theme: str = "bold") -> str:
+    def run(self, clips_dir: str, brief: str, duration: float = 60.0, lut_name: str = "cinematic", project_name: str = "adforge_ad", draft_script: dict = None, draft_timeline: list = None, theme: str = "bold", transition: str = "none", llm_provider: str = None, llm_model: str = None, music_volume: float = None, narration_volume: float = None, fade_duration: float = None, tts_provider: str = None, tts_voice: str = None, aspect_ratio: str = "9:16", primary_color: str = None, accent_color: str = None, font_family: str = None) -> str:
         """Run the full video generation pipeline."""
         print(f"=== Starting AdForge Video Production: {project_name} ===")
+        
+        # Dynamically inject selected LLM parameters if provided
+        llm = LLMManager(provider=llm_provider, model=llm_model)
+        self.selector.llm = llm
+        self.scriptwriter.llm = llm
         
         if draft_script and draft_timeline:
             print("Pre-approved draft script and timeline cuts found. Bypassing AI generator steps.")
@@ -48,7 +55,13 @@ class AdForgeOrchestrator:
             ]
             
             if not clips_paths:
-                raise ValueError(f"No valid video clips found in {clips_dir}")
+                print("No video clips found in uploads. Sourcing stock B-roll clips...")
+                stock_manager = AdStockVideoManager(str(self.workspace_dir), llm_manager=llm)
+                queries = stock_manager.generate_queries(brief)
+                print(f"Generated search queries for stock video: {queries}")
+                clips_paths = stock_manager.search_and_download_broll(queries, clips_dir)
+                if not clips_paths:
+                    raise ValueError(f"No valid video clips found in {clips_dir} and automated B-roll sourcing failed.")
                 
             print(f"Found {len(clips_paths)} video clips to analyze.")
             
@@ -79,13 +92,22 @@ class AdForgeOrchestrator:
         # Step 5: Narration Voice synthesis
         final_narr_audio = self.narrator.generate_aligned_voiceover(
             paragraphs=script["voiceover_paragraphs"],
-            timeline=timeline
+            timeline=timeline,
+            provider=tts_provider,
+            voice=tts_voice
         )
         
         # Step 6: Background music search & download
-        music_query = script.get("music_mood", "upbeat dynamic corporate")
         music_path = self.workspace_dir / "audio" / "background_music.mp3"
-        final_music_audio = self.music.search_and_download(music_query, str(music_path))
+        custom_music_path = self.workspace_dir / "audio" / "custom_music.mp3"
+        
+        if custom_music_path.exists():
+            print("Using custom uploaded background music track.")
+            shutil.copy(str(custom_music_path), str(music_path))
+            final_music_audio = str(music_path)
+        else:
+            music_query = script.get("music_mood", "upbeat dynamic corporate")
+            final_music_audio = self.music.search_and_download(music_query, str(music_path))
         
         # Step 7 & 8: Grade, crop, trim clip segments
         processed_segments = []
@@ -94,8 +116,8 @@ class AdForgeOrchestrator:
             graded_path = self.workspace_dir / "graded" / f"scene_{i}_graded.mp4"
             trimmed_path = self.workspace_dir / "editor" / f"scene_{i}_trimmed.mp4"
             
-            # Crop to 9:16 + Cinematic color grade
-            self.grader.grade_and_crop(raw_clip, str(graded_path), lut_name=lut_name, aspect_ratio="9:16")
+            # Crop + Color grade
+            self.grader.grade_and_crop(raw_clip, str(graded_path), lut_name=lut_name, aspect_ratio=aspect_ratio)
             
             # Trim to exact timeframe
             self.editor.trim_clip(str(graded_path), scene["start"], scene["end"], str(trimmed_path))
@@ -106,7 +128,9 @@ class AdForgeOrchestrator:
         self.editor.stitch_clips(processed_segments, str(raw_video))
         
         # Step 10: Compile React overlay cards
-        scene_titles = script.get("overlay_titles", [])
+        scene_titles = [t.get("caption_text", "") for t in timeline]
+        if not any(scene_titles):
+            scene_titles = script.get("overlay_titles", [])
         scene_durations = [t["end"] - t["start"] for t in timeline]
         overlay_video = self.renderer.render_remotion_overlays(
             video_path=str(raw_video),
@@ -115,7 +139,12 @@ class AdForgeOrchestrator:
             scene_durations=scene_durations,
             cta_text=script.get("cta_text", "Learn More"),
             duration_sec=duration,
-            theme=theme
+            theme=theme,
+            transition=transition,
+            aspect_ratio=aspect_ratio,
+            primary_color=primary_color,
+            accent_color=accent_color,
+            font_family=font_family
         )
         
         # Step 11: Overlay Remotion graphics onto video
@@ -129,7 +158,11 @@ class AdForgeOrchestrator:
             narration_path=final_narr_audio,
             music_path=final_music_audio,
             output_path=str(final_output),
-            video_duration=duration
+            video_duration=duration,
+            music_volume=music_volume,
+            narration_volume=narration_volume,
+            fade_duration=fade_duration,
+            timeline=timeline
         )
         
         print(f"=== Video ad created successfully: {final_output} ===")

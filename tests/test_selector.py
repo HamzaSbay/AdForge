@@ -5,8 +5,7 @@ from pipeline.selector import TimelineSelector
 def test_selector_fallback_timeline_duration(mock_clips_data):
     selector = TimelineSelector()
     
-    # Run selector with None API key to trigger fallback
-    with patch("pipeline.selector.api_key", None):
+    with patch.dict("os.environ", {}, clear=True):
         timeline = selector.create_timeline(mock_clips_data, "Make a baking ad", target_duration=15.0)
         
         # Verify it loops and cuts clips correctly to reach target_duration

@@ -8,9 +8,9 @@ class AdRenderer:
         self.workspace_dir = Path(workspace_dir)
         self.workspace_dir.mkdir(parents=True, exist_ok=True)
 
-    def render_remotion_overlays(self, video_path: str, title: str, scene_titles: list[str], scene_durations: list[float], cta_text: str, duration_sec: float, theme: str = "bold") -> str:
+    def render_remotion_overlays(self, video_path: str, title: str, scene_titles: list[str], scene_durations: list[float], cta_text: str, duration_sec: float, theme: str = "bold", transition: str = "none", aspect_ratio: str = "9:16", primary_color: str = None, accent_color: str = None, font_family: str = None) -> str:
         """Render React overlays combined with the background video using Remotion."""
-        print(f"Rendering Remotion animated overlays (theme: {theme}) on top of background video...")
+        print(f"Rendering Remotion animated overlays (theme: {theme}, transition: {transition}, aspect_ratio: {aspect_ratio}) on top of background video...")
         
         props_path = self.workspace_dir / "remotion_props.json"
         overlay_mp4 = self.workspace_dir / "overlays_raw.mp4"
@@ -26,8 +26,15 @@ class AdRenderer:
             "sceneTitles": scene_titles,
             "sceneDurations": scene_durations,
             "ctaText": cta_text,
-            "theme": theme
+            "theme": theme,
+            "transition": transition
         }
+        if primary_color:
+            props_data["primaryColor"] = primary_color
+        if accent_color:
+            props_data["accentColor"] = accent_color
+        if font_family:
+            props_data["fontFamily"] = font_family
         
         with open(props_path, "w") as f:
             json.dump(props_data, f)
@@ -42,10 +49,17 @@ class AdRenderer:
         abs_props_path = props_path.resolve()
         abs_overlay_mp4 = overlay_mp4.resolve()
 
+        # Determine the Remotion composition based on aspect ratio
+        comp_id = "AdForgeOverlay"
+        if aspect_ratio == "16:9":
+            comp_id = "AdForgeOverlayHorizontal"
+        elif aspect_ratio == "1:1":
+            comp_id = "AdForgeOverlaySquare"
+
         # Run npx remotion render
         cmd = [
             "npx", "remotion", "render",
-            "src/index.tsx", "AdForgeOverlay",
+            "src/index.tsx", comp_id,
             str(abs_overlay_mp4),
             f"--props={abs_props_path}",
             f"--frames=0-{duration_frames - 1}",

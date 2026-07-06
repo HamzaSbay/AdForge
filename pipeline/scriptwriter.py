@@ -1,16 +1,13 @@
 import json
 import os
-import google.generativeai as genai
 from dotenv import load_dotenv
+from pipeline.llm import LLMManager
 
 load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
 
 class ScriptWriter:
-    def __init__(self):
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
+    def __init__(self, llm_manager: LLMManager = None):
+        self.llm = llm_manager or LLMManager()
 
     def write_script(self, timeline: list[dict], brief: str, target_duration: float = 60.0) -> dict:
         """Generate a script for voiceover matched with timeline segments."""
@@ -151,7 +148,9 @@ class ScriptWriter:
             "music_mood": "upbeat " + ("acoustic" if topic in {"baking", "family"} else "corporate")
         }
 
-        if api_key:
+        has_api_keys = bool(os.getenv("GOOGLE_API_KEY") or os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY") or self.llm.provider == "ollama")
+        
+        if has_api_keys:
             prompt = f"""
             You are a professional advertising scriptwriter.
             Write a highly engaging voiceover script for a {target_duration}-second commercial ad.
@@ -178,8 +177,7 @@ class ScriptWriter:
             """
             
             try:
-                response = self.model.generate_content(prompt)
-                text = response.text.strip()
+                text = self.llm.generate_text(prompt, json_mode=True)
                 if text.startswith("```"):
                     text = text.replace("```json", "").replace("```", "").strip()
                 
@@ -188,6 +186,6 @@ class ScriptWriter:
                 if len(script_data.get("voiceover_paragraphs", [])) == len(timeline):
                     return script_data
             except Exception as e:
-                print(f"Gemini scriptwriting failed: {e}. Using fallback.")
+                print(f"AI scriptwriting failed: {e}. Using fallback.")
                 
         return default_script

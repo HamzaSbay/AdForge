@@ -1,89 +1,54 @@
-import base64
 import os
-import requests
 import subprocess
 from pathlib import Path
 from dotenv import load_dotenv
+from pipeline.config import settings
+from pipeline.tts import get_tts_provider
 
 load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
-
-from pipeline.config import settings
 
 class AdNarrator:
-    def __init__(self, workspace_dir: str):
+    def __init__(self, workspace_dir: str, provider: str = None):
         self.workspace_dir = Path(workspace_dir)
         self.workspace_dir.mkdir(parents=True, exist_ok=True)
+        self.provider = provider or settings.get("tts", "provider", "google")
 
-    def generate_speech(self, text: str, output_path: str, voice_name: str = None) -> str:
-        """Call Google Cloud TTS to synthesize text to an MP3 file."""
-        if not voice_name:
-            voice_name = settings.get("tts", "default_voice", "en-US-Journey-D")
-            
-        print(f"Narrating text: '{text[:40]}...' using voice {voice_name}")
+    def generate_speech(self, text: str, output_path: str, voice_name: str = None, provider_name: str = None) -> str:
+        """Generate speech using selected or configured TTS provider with fallback support."""
+        provider = provider_name or self.provider
         
-        speaking_rate = settings.get("tts", "speaking_rate", 1.0)
-        pitch = settings.get("tts", "pitch", 0.0)
-        fallback_rate = settings.get("tts", "local_fallback_rate", 185)
+        # Journey/Chirp voices only exist on google
+        resolved_voice = voice_name
+        if resolved_voice:
+            if "Journey" in resolved_voice or "Chirp" in resolved_voice:
+                if provider != "google":
+                    resolved_voice = None # Let backend choose default
+                    
+        # If Google API key is missing and provider is google, default to edge-tts
+        if provider == "google" and not os.getenv("GOOGLE_API_KEY"):
+            print("GOOGLE_API_KEY is missing. Redirecting Google Cloud TTS to EdgeTTS...")
+            provider = "edge"
+            resolved_voice = None
 
-        # Journey/Chirp voices require v1beta1, others use v1
-        api_version = "v1beta1" if ("Journey" in voice_name or "Chirp" in voice_name) else "v1"
-        url = f"https://texttospeech.googleapis.com/{api_version}/text:synthesize"
-        
-        payload = {
-            "input": {"text": text},
-            "voice": {
-                "languageCode": "en-US",
-                "name": voice_name,
-            },
-            "audioConfig": {
-                "audioEncoding": "MP3",
-                "speakingRate": speaking_rate,
-                "pitch": pitch,
-            },
-        }
-        
-        headers = {"Content-Type": "application/json"}
-        params = {"key": api_key or ""}
-        
+        # Try primary provider
         try:
-            if not api_key:
-                raise ValueError("GOOGLE_API_KEY is empty")
-            response = requests.post(url, headers=headers, params=params, json=payload, timeout=60)
-            response.raise_for_status()
-            audio_data = base64.b64decode(response.json()["audioContent"])
-            Path(output_path).write_bytes(audio_data)
-            return output_path
+            tts_engine = get_tts_provider(provider)
+            return tts_engine.generate_speech(text, output_path, voice_name=resolved_voice)
         except Exception as e:
-            print(f"Google Cloud TTS failed/unauthorized ({e}). Falling back to local offline TTS engine...")
-            try:
+            print(f"Primary TTS provider '{provider}' failed ({e}). Attempting free EdgeTTS fallback...")
+            if provider != "edge":
                 try:
-                    import pythoncom
-                    pythoncom.CoInitialize()
-                except Exception:
-                    pass
-                import pyttsx3
-                temp_wav = Path(output_path).with_suffix(".wav")
-                engine = pyttsx3.init()
-                engine.setProperty('rate', fallback_rate)
-                engine.save_to_file(text, str(temp_wav))
-                engine.runAndWait()
-                
-                # Convert the generated WAV to MP3 or output format
-                cmd = [
-                    "ffmpeg", "-y",
-                    "-i", str(temp_wav),
-                    "-c:a", "libmp3lame",
-                    output_path
-                ]
-                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-                
-                # Cleanup temp wav
-                if temp_wav.exists():
-                    temp_wav.unlink()
-                return output_path
+                    from pipeline.tts import EdgeTTSBackend
+                    return EdgeTTSBackend().generate_speech(text, output_path)
+                except Exception as ex:
+                    print(f"EdgeTTS fallback failed: {ex}. Falling back to pyttsx3 offline engine...")
+            
+            # Absolute fallback to pyttsx3
+            try:
+                from pipeline.tts import LocalTTS
+                return LocalTTS().generate_speech(text, output_path)
             except Exception as fe:
-                print(f"Offline TTS fallback failed: {fe}. Creating a silent placeholder audio.")
+                print(f"Offline pyttsx3 fallback failed: {fe}. Creating a silent placeholder audio.")
                 cmd = [
                     "ffmpeg", "-y",
                     "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
@@ -108,22 +73,19 @@ class AdNarrator:
             print(f"Error checking duration of {audio_path}: {e}")
             return 0.0
 
-    def generate_aligned_voiceover(self, paragraphs: list[str], timeline: list[dict]) -> str:
+    def generate_aligned_voiceover(self, paragraphs: list[str], timeline: list[dict], provider: str = None, voice: str = None) -> str:
         """
         Generate narration audio for each scene, pad/space them out to match
         the starting times of each scene in the timeline, and mix them together.
         """
         scene_audios = []
         
-        # Voice names: en-US-Journey-D (male), en-US-Journey-F (female)
-        voice = "en-US-Journey-D"
-        
         # Step 1: Synthesize each paragraph
         for i, (para, t) in enumerate(zip(paragraphs, timeline)):
             if not para.strip():
                 continue
             para_path = self.workspace_dir / f"scene_{i}_narr.mp3"
-            self.generate_speech(para, str(para_path), voice_name=voice)
+            self.generate_speech(para, str(para_path), voice_name=voice, provider_name=provider)
             
             # Duration of this narration segment
             narr_dur = self.get_audio_duration(str(para_path))
@@ -139,7 +101,6 @@ class AdNarrator:
             })
 
         # Step 2: Mix narration audios with silence delay using FFmpeg complex filter
-        # e.g. -filter_complex "[0]adelay=3000|3000[a0]; [1]adelay=8000|8000[a1]; [a0][a1]amix=inputs=2"
         if not scene_audios:
             # Create a silent audio track as fallback
             silent_path = self.workspace_dir / "silent_narration.mp3"

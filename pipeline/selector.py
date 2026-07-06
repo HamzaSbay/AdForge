@@ -1,19 +1,16 @@
 import json
 import os
-import google.generativeai as genai
 from dotenv import load_dotenv
+from pipeline.llm import LLMManager
 
 load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
 
 class TimelineSelector:
-    def __init__(self):
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
+    def __init__(self, llm_manager: LLMManager = None):
+        self.llm = llm_manager or LLMManager()
 
     def create_timeline(self, clips_data: list[dict], brief: str, target_duration: float = 60.0) -> list[dict]:
-        """Use Gemini to select the best cuts and form a timeline sequence."""
+        """Use configured LLM to select the best cuts and form a timeline sequence."""
         print("Selecting best cuts and planning timeline...")
         
         # Prepare clips overview for Gemini
@@ -78,7 +75,9 @@ class TimelineSelector:
             if cycle > 5: # safety break
                 break
 
-        if api_key:
+        has_api_keys = bool(os.getenv("GOOGLE_API_KEY") or os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY") or self.llm.provider == "ollama")
+        
+        if has_api_keys:
             prompt = f"""
             You are a professional video editor creating a commercial ad.
             
@@ -105,8 +104,7 @@ class TimelineSelector:
             """
             
             try:
-                response = self.model.generate_content(prompt)
-                text = response.text.strip()
+                text = self.llm.generate_text(prompt, json_mode=True)
                 if text.startswith("```"):
                     text = text.replace("```json", "").replace("```", "").strip()
                 
@@ -114,6 +112,6 @@ class TimelineSelector:
                 if isinstance(timeline, list) and len(timeline) > 0:
                     return timeline
             except Exception as e:
-                print(f"Gemini timeline selection failed: {e}. Using fallback.")
+                print(f"AI timeline selection failed: {e}. Using fallback.")
                 
         return default_timeline
